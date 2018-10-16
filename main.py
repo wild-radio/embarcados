@@ -23,7 +23,7 @@ class Motors:
 
     # changes servo 1 angle
     def set_angle1(self, angle):
-        if angle < -60 or angle > 60:
+        if int(angle) < -60 or int(angle) > 60:
             return
 
         duty = (90 + int(angle)) / 18 + 2
@@ -35,7 +35,7 @@ class Motors:
 
     # changes servo 2 angle
     def set_angle2(self, angle):
-        if angle < -60 or angle > 60:
+        if int(angle) < -60 or int(angle) > 60:
             return
 
         duty = (90 + int(angle)) / 18 + 2
@@ -54,16 +54,16 @@ class FileMonitor(threading.Thread):
             f = open(self.file_name, "r")
             lines = f.read().splitlines()
             print lines
-            if self.file_name == "~/.wildradio/config/principal.txt":
-                cam1.active = (lines[0] == 1)  # type: bool
-                cam1.periodic = (lines[1] == 1)  # type: bool
-                cam1.sensor_flag = (lines[2] == 1)  # type: bool
+            if self.file_name == "/home/pi/.wildradio/config/principal.txt":
+                cam1.active = (lines[0] == '1')  # type: bool
+                cam1.periodic = (lines[1] == '1')  # type: bool
+                cam1.sensor_flag = (lines[2] == '1')  # type: bool
                 motors_cam1.set_angle1(lines[3])
                 motors_cam1.set_angle2(lines[4])
-            elif self.file_name == "~/.wildradio/config/alternativa.txt":
-                cam2.active = (lines[0] == 1)  # type: bool
-                cam2.periodic = (lines[1] == 1)  # type: bool
-                cam2.sensor_flag = (lines[2] == 1)  # type: bool
+            elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
+                cam2.active = (lines[0] == '1')  # type: bool
+                cam2.periodic = (lines[1] == '1')  # type: bool
+                cam2.sensor_flag = (lines[2] == '1')  # type: bool
                 motors_cam2.set_angle1(lines[3])
                 motors_cam2.set_angle2(lines[4])
             f.close()
@@ -75,7 +75,7 @@ class FileMonitor(threading.Thread):
         global motors_cam1
         global motors_cam2
         global cam1
-        global cam2
+        # global cam2
         while True:
             if os.path.exists(self.file_name) and os.path.getmtime(self.file_name) != self.last_modified:
                 self.last_modified = os.path.getmtime(self.file_name)
@@ -83,22 +83,22 @@ class FileMonitor(threading.Thread):
                 f = open(self.file_name, "r")
                 lines = f.read().splitlines()
                 print lines
-                if self.file_name == "~/.wildradio/config/principal.txt":
-                    cam1.active = (lines[0] == 1)  # type: bool
-                    cam1.periodic = (lines[1] == 1)  # type: bool
-                    cam1.sensor_flag = (lines[2] == 1)  # type: bool
+                if self.file_name == "/home/pi/.wildradio/config/principal.txt":
+                    cam1.active = (lines[0] == '1')  # type: bool
+                    cam1.periodic = (lines[1] == '1')  # type: bool
+                    cam1.sensor_flag = (lines[2] == '1')  # type: bool
                     motors_cam1.set_angle1(lines[3])
                     motors_cam1.set_angle2(lines[4])
                     if lines[5] == 1:
-                        cam1.take_picture("~/.wildradio/pictures/confirmation_cam_1")
-                elif self.file_name == "~/.wildradio/config/alternativa.txt":
-                    cam2.active = (lines[0] == 1)   # type: bool
-                    cam2.periodic = (lines[1] == 1)  # type: bool
-                    cam2.sensor_flag = (lines[2] == 1)  # type: bool
+                        cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1")
+                elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
+                    cam2.active = (lines[0] == '1')   # type: bool
+                    cam2.periodic = (lines[1] == '1')  # type: bool
+                    cam2.sensor_flag = (lines[2] == '1')  # type: bool
                     motors_cam2.set_angle1(lines[3])
                     motors_cam2.set_angle2(lines[4])
                     if lines[5] == 1:
-                        cam2.take_picture("~/.wildradio/pictures/confirmation_cam_2")
+                        cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2")
                 f.close()
 
 
@@ -122,6 +122,7 @@ class Camera(threading.Thread):
                 if (GPIO.event_detected(self.sensor_pin) and self.sensor_flag) or (self.periodic and self.timer_flag):
                     img_name = "cam{}_{}.png".format(self.cam_index, time.time())
                     self.take_picture(img_name)
+		    self.timer_flag = False
                 else:
                     self.timer_flag = False
 
@@ -136,13 +137,13 @@ class Camera(threading.Thread):
         threading.Timer(60, self.timed_photo).start()
 
 
-motors_cam1 = Motors(40, 37)
-motors_cam2 = Motors(38, 35)
-cam1 = Camera(0, 1, 3)
+motors_cam1 = Motors(35, 33)
+motors_cam2 = Motors(38, 36)
+cam1 = Camera(-1, 1, 37)
 cam1.start()
-cam2 = Camera(1, 2, 3)
-cam2.start()
-file_monitor1 = FileMonitor("~/.wildradio/config/principal.txt")
+# cam2 = Camera(1, 2, 37)
+# cam2.start()
+file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
-file_monitor2 = FileMonitor("~/.wildradio/config/alternativa.txt")
-file_monitor2.start()
+#file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
+#file_monitor2.start()

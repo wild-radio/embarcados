@@ -2,13 +2,13 @@ import cv2
 
 cam = cv2.VideoCapture(1)
 
-cv2.namedWindow("test")
+# cv2.namedWindow("test")
 
 img_counter = 0
 
 while True:
     ret, frame = cam.read()
-    cv2.imshow("test", frame)
+    # cv2.imshow("test", frame)
     if not ret:
         break
     k = cv2.waitKey(1)
@@ -26,4 +26,4 @@ while True:
 
 cam.release()
 
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()

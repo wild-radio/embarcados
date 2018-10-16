@@ -4,11 +4,15 @@ from time import sleep
 # initialize
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(3, GPIO.IN)
-valid_read = True
+GPIO.setup(37, GPIO.IN)
+try:
+	while True:
+		print GPIO.input(37)
+		sleep(1)
 
-while True:
-	print GPIO.input(3)
+	GPIO.cleanup()
 
 
-GPIO.cleanup()
+except:
+	GPIO.cleanup() #reset all GPIO
+	print ("Program ended")
