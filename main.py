@@ -51,6 +51,22 @@ class FileMonitor(threading.Thread):
         self.file_name = file_name
         if os.path.exists(self.file_name):
             self.last_modified = os.path.getmtime(self.file_name)
+            f = open(self.file_name, "r")
+            lines = f.read().splitlines()
+            print lines
+            if self.file_name == "~/.wildradio/config/principal.txt":
+                cam1.active = (lines[0] == 1)  # type: bool
+                cam1.periodic = (lines[1] == 1)  # type: bool
+                cam1.sensor_flag = (lines[2] == 1)  # type: bool
+                motors_cam1.set_angle1(lines[3])
+                motors_cam1.set_angle2(lines[4])
+            elif self.file_name == "~/.wildradio/config/alternativa.txt":
+                cam2.active = (lines[0] == 1)  # type: bool
+                cam2.periodic = (lines[1] == 1)  # type: bool
+                cam2.sensor_flag = (lines[2] == 1)  # type: bool
+                motors_cam2.set_angle1(lines[3])
+                motors_cam2.set_angle2(lines[4])
+            f.close()
         else:
             self.last_modified = None
         threading.Thread.__init__(self)
@@ -83,7 +99,6 @@ class FileMonitor(threading.Thread):
                     motors_cam2.set_angle2(lines[4])
                     if lines[5] == 1:
                         cam2.take_picture("~/.wildradio/pictures/confirmation_cam_2")
-
                 f.close()
 
 
