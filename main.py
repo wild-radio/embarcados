@@ -14,6 +14,8 @@ class Motors:
         GPIO.setup(out1, GPIO.OUT)  # 0o3
         GPIO.setup(out2, GPIO.OUT)  # 0o5
         # setup frequency
+	self.pin1 = out1
+	self.pin2 = out2
         self.pwm1 = GPIO.PWM(out1, 50)
         self.pwm2 = GPIO.PWM(out2, 50)
 
@@ -24,19 +26,19 @@ class Motors:
     # changes servo 1 angle
     def set_angle1(self, angle):
         duty = int(angle) / 18 + 2
-        GPIO.output(0o3, True)
+        GPIO.output(self.pin1, True)
         self.pwm1.ChangeDutyCycle(duty)
         sleep(1)
-        GPIO.output(0o3, False)
+        GPIO.output(self.pin1, False)
         self.pwm1.ChangeDutyCycle(0)
 
     # changes servo 2 angle
     def set_angle2(self, angle):
         duty = int(angle) / 18 + 2
-        GPIO.output(0o5, True)
+        GPIO.output(self.pin2, True)
         self.pwm2.ChangeDutyCycle(duty)
         sleep(1)
-        GPIO.output(0o5, False)
+        GPIO.output(self.pin2, False)
         self.pwm2.ChangeDutyCycle(0)
 
 
@@ -61,10 +63,8 @@ class FileMonitor(threading.Thread):
                 print lines
                 motors_cam1.set_angle1(lines[0])
                 motors_cam1.set_angle2(lines[1])
-                sleep(2)
                 motors_cam2.set_angle1(lines[2])
                 motors_cam2.set_angle2(lines[3])
-                sleep(2)
                 f.close()
 
 
@@ -85,9 +85,9 @@ class Camera(threading.Thread):
             self.img_counter += 1
 
 
-motors_cam1 = Motors(38, 40)
-motors_cam2 = Motors(35, 37)
+motors_cam1 = Motors(40, 37)
+motors_cam2 = Motors(38, 35)
 file_monitor = FileMonitor("file.txt")
 file_monitor.start()
-camera_thread = Camera(0)
+camera_thread = Camera(-1)
 camera_thread.start()

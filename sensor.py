@@ -4,15 +4,11 @@ from time import sleep
 # initialize
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(0o13, GPIO.IN)
+GPIO.setup(3, GPIO.IN)
 valid_read = True
 
 while True:
-    if GPIO.input(11):
-        valid_read = False
-        print "ó o cuzao passando"
-    else:
-        valid_read = True
+	print GPIO.input(3)
 
 
 GPIO.cleanup()
