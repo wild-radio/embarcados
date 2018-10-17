@@ -75,7 +75,7 @@ class FileMonitor(threading.Thread):
         global motors_cam1
         global motors_cam2
         global cam1
-        # global cam2
+        global cam2
         while True:
             if os.path.exists(self.file_name) and os.path.getmtime(self.file_name) != self.last_modified:
                 self.last_modified = os.path.getmtime(self.file_name)
@@ -141,9 +141,9 @@ motors_cam1 = Motors(35, 33)
 motors_cam2 = Motors(38, 36)
 cam1 = Camera(-1, 1, 37)
 cam1.start()
-# cam2 = Camera(1, 2, 37)
-# cam2.start()
+cam2 = Camera(-1, 2, 37)
+cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
-#file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
-#file_monitor2.start()
+file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
+file_monitor2.start()
