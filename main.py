@@ -16,10 +16,10 @@ class Motors:
         GPIO.setup(out2, GPIO.OUT)
         self.pin1 = out1
         self.pin2 = out2
-        self.pwm1 = GPIO.PWM(out1, 50) # setup frequency
-        self.pwm2 = GPIO.PWM(out2, 50) # setup frequency
-        self.pwm1.start(0) # starts with 0% duty cycle
-        self.pwm2.start(0) # starts with 0% duty cycle
+        self.pwm1 = GPIO.PWM(out1, 50)  # setup frequency
+        self.pwm2 = GPIO.PWM(out2, 50)  # setup frequency
+        self.pwm1.start(0)  # starts with 0% duty cycle
+        self.pwm2.start(0)  # starts with 0% duty cycle
 
     # changes servo 1 angle
     def set_angle1(self, angle):
@@ -92,7 +92,7 @@ class FileMonitor(threading.Thread):
                     if lines[5] == 1:
                         cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1")
                 elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
-                    cam2.active = (lines[0] == '1')   # type: bool
+                    cam2.active = (lines[0] == '1')  # type: bool
                     cam2.periodic = (lines[1] == '1')  # type: bool
                     cam2.sensor_flag = (lines[2] == '1')  # type: bool
                     motors_cam2.set_angle1(lines[3])
@@ -105,14 +105,12 @@ class FileMonitor(threading.Thread):
 class Camera(threading.Thread):
     def __init__(self, cam, index, sensor_pin):
         self.cam = cv2.VideoCapture(cam)  # starts cam capturing
-        self.cam_index = index            # cam number to img name
+        self.cam_index = index  # cam number to img name
         self.sensor_pin = sensor_pin
         self.active = False
         self.periodic = False
         self.timer_flag = False
         self.sensor_flag = False
-        GPIO.setup(self.sensor_pin, GPIO.IN)
-        GPIO.add_event_detect(self.sensor_pin, GPIO.RISING)
         self.timed_photo()
         threading.Thread.__init__(self)
 
@@ -122,7 +120,7 @@ class Camera(threading.Thread):
                 if (GPIO.event_detected(self.sensor_pin) and self.sensor_flag) or (self.periodic and self.timer_flag):
                     img_name = "cam{}_{}.png".format(self.cam_index, time.time())
                     self.take_picture(img_name)
-		    self.timer_flag = False
+                    self.timer_flag = False
                 else:
                     self.timer_flag = False
 
@@ -139,9 +137,12 @@ class Camera(threading.Thread):
 
 motors_cam1 = Motors(35, 33)
 motors_cam2 = Motors(38, 36)
-cam1 = Camera(-1, 1, 37)
+sensor_pin = 37
+GPIO.setup(sensor_pin, GPIO.IN)
+GPIO.add_event_detect(sensor_pin, GPIO.RISING)
+cam1 = Camera(-1, 1, sensor_pin)
 cam1.start()
-cam2 = Camera(-1, 2, 37)
+cam2 = Camera(-1, 2, sensor_pin)
 cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
