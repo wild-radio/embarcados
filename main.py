@@ -138,7 +138,8 @@ class Camera(threading.Thread):
     def timed_photo(self):
         if self.periodic:
             self.timer_flag = True
-        threading.Timer(60, self.timed_photo).start()
+	    print "{} timer".format(self.cam_index)
+        threading.Timer(25, self.timed_photo).start()
 
 
 motors_cam1 = Motors(35, 33)
@@ -146,6 +147,8 @@ motors_cam2 = Motors(38, 36)
 sensor_pin = 37
 GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
+sensor_cam1 = False
+sensor_cam2 = False
 cam1 = Camera(3, 1, sensor_pin)
 cam1.start()
 cam2 = Camera(2, 2, sensor_pin)
