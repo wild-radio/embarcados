@@ -115,12 +115,18 @@ class Camera(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
+        global sensor_cam1
+        global sensor_cam2
         while True:
             if self.active:
-                if (GPIO.event_detected(self.sensor_pin) and self.sensor_flag) or (self.periodic and self.timer_flag):
+                if (self.cam_index == 1 and sensor_cam1 and self.sensor_flag) or(self.cam_index == 2 and sensor_cam2 and self.sensor_flag) or (self.periodic and self.timer_flag):
                     img_name = "cam{}_{}.png".format(self.cam_index, time.time())
                     self.take_picture(img_name)
                     self.timer_flag = False
+                    if self.cam_index == 1:
+                        sensor_cam1 = False
+                    elif self.cam_index == 2:
+                        sensor_cam2 = False
                 else:
                     self.timer_flag = False
 
@@ -140,11 +146,15 @@ motors_cam2 = Motors(38, 36)
 sensor_pin = 37
 GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
-cam1 = Camera(2, 1, sensor_pin)
+cam1 = Camera(3, 1, sensor_pin)
 cam1.start()
-cam2 = Camera(3, 2, sensor_pin)
+cam2 = Camera(2, 2, sensor_pin)
 cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
 file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
 file_monitor2.start()
+while True:
+    if GPIO.event_detected(sensor_pin):
+        sensor_cam1 = True
+        sensor_cam2 = True
