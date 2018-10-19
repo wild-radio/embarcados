@@ -106,7 +106,7 @@ class FileMonitor(threading.Thread):
                         sleep(0.3)
                         cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2")
                 f.close()
-            sleep(0.3)
+            sleep(0.5)
 
 
 class Camera(threading.Thread):
@@ -139,7 +139,7 @@ class Camera(threading.Thread):
                         sensor_cam2 = False
                 else:
                     self.timer_flag = False
-            sleep(0.15)
+            sleep(0.05)
 
     def take_picture(self, img_name):
         cv2.imwrite(img_name, self.frame)
@@ -159,9 +159,9 @@ GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
 sensor_cam2 = False
-cam1 = Camera(3, 1)
+cam1 = Camera(0, 1)
 cam1.start()
-cam2 = Camera(2, 2)
+cam2 = Camera(1, 2)
 cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
@@ -169,6 +169,7 @@ file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
 file_monitor2.start()
 while True:
     if GPIO.event_detected(sensor_pin):
+	sleep(0.1)
         sensor_cam1 = True
         sensor_cam2 = True
     sleep(0.1)
