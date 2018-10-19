@@ -49,6 +49,10 @@ class Motors:
 class FileMonitor(threading.Thread):
     def __init__(self, file_name):
         self.file_name = file_name
+        global motors_cam1
+        global motors_cam2
+        global cam1
+        global cam2
         if os.path.exists(self.file_name):
             self.last_modified = os.path.getmtime(self.file_name)
             f = open(self.file_name, "r")
@@ -89,7 +93,8 @@ class FileMonitor(threading.Thread):
                     cam1.sensor_flag = (lines[2] == '1')  # type: bool
                     motors_cam1.set_angle1(lines[3])
                     motors_cam1.set_angle2(lines[4])
-                    if lines[5] == 1:
+                    if lines[5] == '1':
+                        sleep(0.3)
                         cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1")
                 elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
                     cam2.active = (lines[0] == '1')  # type: bool
@@ -97,20 +102,22 @@ class FileMonitor(threading.Thread):
                     cam2.sensor_flag = (lines[2] == '1')  # type: bool
                     motors_cam2.set_angle1(lines[3])
                     motors_cam2.set_angle2(lines[4])
-                    if lines[5] == 1:
+                    if lines[5] == '1':
+                        sleep(0.3)
                         cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2")
                 f.close()
+            sleep(0.3)
 
 
 class Camera(threading.Thread):
-    def __init__(self, cam, index, sensor_pin):
+    def __init__(self, cam, index):
         self.cam = cv2.VideoCapture(cam)  # starts cam capturing
         self.cam_index = index  # cam number to img name
-        self.sensor_pin = sensor_pin
         self.active = False
         self.periodic = False
         self.timer_flag = False
         self.sensor_flag = False
+        self.frame = None
         self.timed_photo()
         threading.Thread.__init__(self)
 
@@ -118,9 +125,12 @@ class Camera(threading.Thread):
         global sensor_cam1
         global sensor_cam2
         while True:
+            self.frame = self.cam.read()[1]
             if self.active:
-                if (self.cam_index == 1 and sensor_cam1 and self.sensor_flag) or(self.cam_index == 2 and sensor_cam2 and self.sensor_flag) or (self.periodic and self.timer_flag):
-                    img_name = "cam{}_{}.png".format(self.cam_index, time.time())
+                if (self.cam_index == 1 and sensor_cam1 and self.sensor_flag) or (
+                        self.cam_index == 2 and sensor_cam2 and self.sensor_flag) or (
+                        self.periodic and self.timer_flag):
+                    img_name = "/home/pi/.wildradio/pictures/cam{}_{}.png".format(self.cam_index, time.time())
                     self.take_picture(img_name)
                     self.timer_flag = False
                     if self.cam_index == 1:
@@ -129,16 +139,16 @@ class Camera(threading.Thread):
                         sensor_cam2 = False
                 else:
                     self.timer_flag = False
+            sleep(0.15)
 
     def take_picture(self, img_name):
-        frame = self.cam.read()[1]
-        cv2.imwrite(img_name, frame)
+        cv2.imwrite(img_name, self.frame)
         print("{} written!".format(img_name))
 
     def timed_photo(self):
         if self.periodic:
             self.timer_flag = True
-	    print "{} timer".format(self.cam_index)
+        print "{} timer".format(self.cam_index)
         threading.Timer(25, self.timed_photo).start()
 
 
@@ -149,9 +159,9 @@ GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
 sensor_cam2 = False
-cam1 = Camera(3, 1, sensor_pin)
+cam1 = Camera(3, 1)
 cam1.start()
-cam2 = Camera(2, 2, sensor_pin)
+cam2 = Camera(2, 2)
 cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
@@ -161,3 +171,4 @@ while True:
     if GPIO.event_detected(sensor_pin):
         sensor_cam1 = True
         sensor_cam2 = True
+    sleep(0.1)
