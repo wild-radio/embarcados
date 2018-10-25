@@ -95,7 +95,7 @@ class FileMonitor(threading.Thread):
                     motors_cam1.set_angle2(lines[4])
                     if lines[5] == '1':
                         sleep(0.3)
-                        cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1")
+                        cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1.ppm")
                 elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
                     cam2.active = (lines[0] == '1')  # type: bool
                     cam2.periodic = (lines[1] == '1')  # type: bool
@@ -104,7 +104,7 @@ class FileMonitor(threading.Thread):
                     motors_cam2.set_angle2(lines[4])
                     if lines[5] == '1':
                         sleep(0.3)
-                        cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2")
+                        cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2.ppm")
                 f.close()
             sleep(0.5)
 
@@ -130,7 +130,7 @@ class Camera(threading.Thread):
                 if (self.cam_index == 1 and sensor_cam1 and self.sensor_flag) or (
                         self.cam_index == 2 and sensor_cam2 and self.sensor_flag) or (
                         self.periodic and self.timer_flag):
-                    img_name = "/home/pi/.wildradio/pictures/cam{}_{}.png".format(self.cam_index, time.time())
+                    img_name = "/home/pi/.wildradio/pictures/cam{}_{}.ppm".format(self.cam_index, time.time())
                     self.take_picture(img_name)
                     self.timer_flag = False
                     if self.cam_index == 1:

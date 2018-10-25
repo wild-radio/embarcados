@@ -1,51 +1,95 @@
+import threading
+import os
 import RPi.GPIO as GPIO
 from time import sleep
 
-# initialize
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(0o3, GPIO.OUT)
-GPIO.setup(0o5, GPIO.OUT)
 
-# setup frequency
-pwm1=GPIO.PWM(0o3, 50)
-pwm2=GPIO.PWM(0o5, 50)
+class Motors:
+    def __init__(self, out1, out2):
+        # initialize
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(out1, GPIO.OUT)
+        GPIO.setup(out2, GPIO.OUT)
+        self.pin1 = out1
+        self.pin2 = out2
+        self.pwm1 = GPIO.PWM(out1, 50)  # setup frequency
+        self.pwm2 = GPIO.PWM(out2, 50)  # setup frequency
+        self.pwm1.start(0)  # starts with 0% duty cycle
+        self.pwm2.start(0)  # starts with 0% duty cycle
 
-# starts with 0% duty cicle
-pwm1.start(0)
-pwm2.start(0)
+    # changes servo 1 angle
+    def set_angle1(self, angle):
+        if int(angle) < -60 or int(angle) > 60:
+            return
 
-# changes servo 1 angle
-def SetAngle1(angle):
-    duty = angle / 18 + 2
-    GPIO.output(0o3, True)
-    pwm1.ChangeDutyCycle(duty)
-    sleep(1)
-    GPIO.output(0o3, False)
-    pwm1.ChangeDutyCycle(0)
+        duty = (90 + int(angle)) / 18 + 2
+        GPIO.output(self.pin1, True)
+        self.pwm1.ChangeDutyCycle(duty)
+        sleep(1)
+        GPIO.output(self.pin1, False)
+        self.pwm1.ChangeDutyCycle(0)
 
-# changes servo 2 angle 
-#TOMAR CUIDADO, ESSA PORRA PODE QUEBRAR O SUPORTE
-def SetAngle2(angle):
-    duty = angle / 18 + 2
-    GPIO.output(0o5, True)
-    pwm2.ChangeDutyCycle(duty)
-    sleep(1)
-    GPIO.output(0o5, False)
-    pwm2.ChangeDutyCycle(0)
+    # changes servo 2 angle
+    def set_angle2(self, angle):
+        if int(angle) < -60 or int(angle) > 60:
+            return
+
+        duty = (90 + int(angle)) / 18 + 2
+        GPIO.output(self.pin2, True)
+        self.pwm2.ChangeDutyCycle(duty)
+        sleep(1)
+        GPIO.output(self.pin2, False)
+        self.pwm2.ChangeDutyCycle(0)
 
 
+class FileMonitor(threading.Thread):
+    def __init__(self, file_name):
+        self.file_name = file_name
+        global motors_cam1
+        global motors_cam2
+        if os.path.exists(self.file_name):
+            self.last_modified = os.path.getmtime(self.file_name)
+            f = open(self.file_name, "r")
+            lines = f.read().splitlines()
+            print lines
+            if self.file_name == "/home/pi/.wildradio/config/principal.txt":
+                motors_cam1.set_angle1(lines[3])
+                motors_cam1.set_angle2(lines[4])
+            elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
+                motors_cam2.set_angle1(lines[3])
+                motors_cam2.set_angle2(lines[4])
+            f.close()
+        else:
+            self.last_modified = None
+        threading.Thread.__init__(self)
+
+    def run(self):
+        global motors_cam1
+        global motors_cam2
+        while True:
+            if os.path.exists(self.file_name) and os.path.getmtime(self.file_name) != self.last_modified:
+                self.last_modified = os.path.getmtime(self.file_name)
+                print('%s modified' % self.file_name)
+                f = open(self.file_name, "r")
+                lines = f.read().splitlines()
+                print lines
+                if self.file_name == "/home/pi/.wildradio/config/principal.txt":
+                    motors_cam1.set_angle1(lines[3])
+                    motors_cam1.set_angle2(lines[4])
+                elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
+                    motors_cam2.set_angle1(lines[3])
+                    motors_cam2.set_angle2(lines[4])
+                f.close()
+            sleep(0.5)
+
+
+motors_cam1 = Motors(35, 33)
+motors_cam2 = Motors(38, 36)
+file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
+file_monitor1.start()
+file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
+file_monitor2.start()
 
 while True:
-    ang1 = int(input("Angulo 1 de 0 a 180º         "))
-    SetAngle1(ang1)
-    ang2 = int(input("Angulo 2 de 0 a 180º         "))
-    SetAngle2(ang2)
-    quit = int(input("digite 1 para sair ou outra coisa para mudar de novo os angulos          "))
-    if quit == 1:
-        break
-    
-
-pwm1.stop()
-pwm2.stop()
-GPIO.cleanup()
+    sleep(0.1)
