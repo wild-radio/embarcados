@@ -26,7 +26,7 @@ class Motors:
         if int(angle) < -60 or int(angle) > 60:
             return
 
-        duty = (90 + int(angle)) / 18 + 2
+        duty = (90 + int(angle)) / 18.0 + 2
         GPIO.output(self.pin1, True)
         self.pwm1.ChangeDutyCycle(duty)
         sleep(1)
@@ -38,7 +38,7 @@ class Motors:
         if int(angle) < -60 or int(angle) > 60:
             return
 
-        duty = (90 + int(angle)) / 18 + 2
+        duty = (90 + int(angle)) / 18.0 + 2
         GPIO.output(self.pin2, True)
         self.pwm2.ChangeDutyCycle(duty)
         sleep(1)
@@ -53,6 +53,10 @@ class FileMonitor(threading.Thread):
         global motors_cam2
         global cam1
         global cam2
+        self.pri_ang1 = None
+        self.pri_ang2 = None
+        self.alt_ang1 = None
+        self.alt_ang2 = None
         if os.path.exists(self.file_name):
             self.last_modified = os.path.getmtime(self.file_name)
             f = open(self.file_name, "r")
@@ -62,12 +66,16 @@ class FileMonitor(threading.Thread):
                 cam1.active = (lines[0] == '1')  # type: bool
                 cam1.periodic = (lines[1] == '1')  # type: bool
                 cam1.sensor_flag = (lines[2] == '1')  # type: bool
+                self.pri_ang1 = lines[3]
+                self.pri_ang2 = lines[4]
                 motors_cam1.set_angle1(lines[3])
                 motors_cam1.set_angle2(lines[4])
             elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
                 cam2.active = (lines[0] == '1')  # type: bool
                 cam2.periodic = (lines[1] == '1')  # type: bool
                 cam2.sensor_flag = (lines[2] == '1')  # type: bool
+                self.alt_ang1 = lines[3]
+                self.alt_ang2 = lines[4]
                 motors_cam2.set_angle1(lines[3])
                 motors_cam2.set_angle2(lines[4])
             f.close()
@@ -91,8 +99,12 @@ class FileMonitor(threading.Thread):
                     cam1.active = (lines[0] == '1')  # type: bool
                     cam1.periodic = (lines[1] == '1')  # type: bool
                     cam1.sensor_flag = (lines[2] == '1')  # type: bool
-                    motors_cam1.set_angle1(lines[3])
-                    motors_cam1.set_angle2(lines[4])
+                    if self.pri_ang1 != lines[3]:
+                        self.pri_ang1 = lines[3]
+                        motors_cam1.set_angle1(lines[3])
+                    if self.pri_ang2 != lines[4]:
+                        self.pri_ang2 = lines[4]
+                        motors_cam1.set_angle2(lines[4])
                     if lines[5] == '1':
                         sleep(0.3)
                         cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1.ppm")
@@ -100,8 +112,12 @@ class FileMonitor(threading.Thread):
                     cam2.active = (lines[0] == '1')  # type: bool
                     cam2.periodic = (lines[1] == '1')  # type: bool
                     cam2.sensor_flag = (lines[2] == '1')  # type: bool
-                    motors_cam2.set_angle1(lines[3])
-                    motors_cam2.set_angle2(lines[4])
+                    if self.alt_ang1 != lines[3]:
+                        self.alt_ang1 = lines[3]
+                        motors_cam2.set_angle1(lines[3])
+                    if self.alt_ang2 != lines[4]:
+                        self.alt_ang2 = lines[4]
+                        motors_cam2.set_angle2(lines[4])
                     if lines[5] == '1':
                         sleep(0.3)
                         cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2.ppm")
@@ -169,7 +185,7 @@ file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
 file_monitor2.start()
 while True:
     if GPIO.event_detected(sensor_pin):
-	sleep(0.1)
+        sleep(0.1)
         sensor_cam1 = True
         sensor_cam2 = True
     sleep(0.1)
