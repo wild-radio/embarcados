@@ -74,6 +74,14 @@ class FileMonitor(threading.Thread):
                 cam2.active = (lines[0] == '1')  # type: bool
                 cam2.periodic = (lines[1] == '1')  # type: bool
                 cam2.sensor_flag = (lines[2] == '1')  # type: bool
+                if int(lines[3]) > 40:
+                    lines[3] = '40'
+                elif int(lines[3]) < -40:
+                    lines[3] = '-40'
+                if int(lines[4]) > 40:
+                    lines[4] = '40'
+                elif int(lines[4]) < -40:
+                    lines[4] = '-40'
                 self.alt_ang1 = lines[3]
                 self.alt_ang2 = lines[4]
                 motors_cam2.set_angle1(lines[3])
@@ -112,6 +120,14 @@ class FileMonitor(threading.Thread):
                     cam2.active = (lines[0] == '1')  # type: bool
                     cam2.periodic = (lines[1] == '1')  # type: bool
                     cam2.sensor_flag = (lines[2] == '1')  # type: bool
+                    if int(lines[3]) > 40:
+                        lines[3] = '40'
+                    elif int(lines[3]) < -40:
+                        lines[3] = '-40'
+                    if int(lines[4]) > 40:
+                        lines[4] = '40'
+                    elif int(lines[4]) < -40:
+                        lines[4] = '-40'
                     if self.alt_ang1 != lines[3]:
                         self.alt_ang1 = lines[3]
                         motors_cam2.set_angle1(lines[3])
@@ -170,7 +186,7 @@ class Camera(threading.Thread):
 
 motors_cam1 = Motors(35, 33)
 motors_cam2 = Motors(38, 36)
-sensor_pin = 37
+sensor_pin = 40
 GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
