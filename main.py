@@ -115,7 +115,7 @@ class FileMonitor(threading.Thread):
                         motors_cam1.set_angle2(lines[4])
                     if lines[5] == '1':
                         sleep(0.3)
-                        cam1.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_1.ppm")
+                        cam1.take_picture("/home/pi/.wildradio/pictures/main/confirmation_cam_1.ppm")
                 elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
                     cam2.active = (lines[0] == '1')  # type: bool
                     cam2.periodic = (lines[1] == '1')  # type: bool
@@ -136,15 +136,15 @@ class FileMonitor(threading.Thread):
                         motors_cam2.set_angle2(lines[4])
                     if lines[5] == '1':
                         sleep(0.3)
-                        cam2.take_picture("/home/pi/.wildradio/pictures/confirmation_cam_2.ppm")
+                        cam2.take_picture("/home/pi/.wildradio/pictures/secondary/confirmation_cam_2.ppm")
                 f.close()
             sleep(0.5)
 
 
 class Camera(threading.Thread):
-    def __init__(self, cam, index):
+    def __init__(self, cam, folder):
         self.cam = cv2.VideoCapture(cam)  # starts cam capturing
-        self.cam_index = index  # cam number to img name
+        self.cam_folder = folder  # cam number to img name
         self.active = False
         self.periodic = False
         self.timer_flag = False
@@ -162,7 +162,7 @@ class Camera(threading.Thread):
                 if (self.cam_index == 1 and sensor_cam1 and self.sensor_flag) or (
                         self.cam_index == 2 and sensor_cam2 and self.sensor_flag) or (
                         self.periodic and self.timer_flag):
-                    img_name = "/home/pi/.wildradio/pictures/cam{}_{}.ppm".format(self.cam_index, time.time())
+                    img_name = "/home/pi/.wildradio/pictures/{}/{}.ppm".format(self.cam_folder, int(time.time()))
                     self.take_picture(img_name)
                     self.timer_flag = False
                     if self.cam_index == 1:
@@ -191,9 +191,9 @@ GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
 sensor_cam2 = False
-cam1 = Camera(0, 1)
+cam1 = Camera(2, "main")
 cam1.start()
-cam2 = Camera(1, 2)
+cam2 = Camera(3, "secondary")
 cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
