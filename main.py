@@ -191,10 +191,10 @@ GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
 sensor_cam2 = False
-cam1 = Camera(2, "main")
+cam1 = Camera(-1, "main")
 cam1.start()
-cam2 = Camera(3, "secondary")
-cam2.start()
+# cam2 = Camera(3, "secondary")
+# cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
 file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
