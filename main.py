@@ -65,15 +65,16 @@ class FileMonitor(threading.Thread):
             if self.file_name == "/home/pi/.wildradio/config/principal.txt":
                 cam1.active = (lines[0] == '1')  # type: bool
                 cam1.periodic = (lines[1] == '1')  # type: bool
-                cam1.sensor_flag = (lines[2] == '1')  # type: bool
+                cam1.sensor_flag = False  # type: bool
                 self.pri_ang1 = lines[3]
                 self.pri_ang2 = lines[4]
                 motors_cam1.set_angle1(lines[3])
                 motors_cam1.set_angle2(lines[4])
+                cam1.sensor_flag = (lines[2] == '1')  # type: bool
             # elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
             #     cam2.active = (lines[0] == '1')  # type: bool
             #     cam2.periodic = (lines[1] == '1')  # type: bool
-            #     cam2.sensor_flag = (lines[2] == '1')  # type: bool
+            #     cam2.sensor_flag = False  # type: bool
             #     if int(lines[3]) > 40:
             #         lines[3] = '40'
             #     elif int(lines[3]) < -40:
@@ -86,6 +87,7 @@ class FileMonitor(threading.Thread):
             #     self.alt_ang2 = lines[4]
             #     motors_cam2.set_angle1(lines[3])
             #     motors_cam2.set_angle2(lines[4])
+            #     cam2.sensor_flag = (lines[2] == '1')  # type: bool
             f.close()
         else:
             self.last_modified = None
@@ -106,7 +108,7 @@ class FileMonitor(threading.Thread):
                 if self.file_name == "/home/pi/.wildradio/config/principal.txt":
                     cam1.active = (lines[0] == '1')  # type: bool
                     cam1.periodic = (lines[1] == '1')  # type: bool
-                    cam1.sensor_flag = (lines[2] == '1')  # type: bool
+                    cam1.sensor_flag = False  # type: bool
                     if self.pri_ang1 != lines[3]:
                         self.pri_ang1 = lines[3]
                         motors_cam1.set_angle1(lines[3])
@@ -116,10 +118,11 @@ class FileMonitor(threading.Thread):
                     if lines[5] == '1':
                         sleep(0.3)
                         cam1.take_picture("/home/pi/.wildradio/pictures/main/confirmation_cam_1.ppm")
+                    cam1.sensor_flag = (lines[2] == '1')  # type: bool
                 # elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
                 #     cam2.active = (lines[0] == '1')  # type: bool
                 #     cam2.periodic = (lines[1] == '1')  # type: bool
-                #     cam2.sensor_flag = (lines[2] == '1')  # type: bool
+                #     cam2.sensor_flag = False  # type: bool
                 #     if int(lines[3]) > 40:
                 #         lines[3] = '40'
                 #     elif int(lines[3]) < -40:
@@ -137,6 +140,7 @@ class FileMonitor(threading.Thread):
                 #     if lines[5] == '1':
                 #         sleep(0.3)
                 #         cam2.take_picture("/home/pi/.wildradio/pictures/secondary/confirmation_cam_2.ppm")
+                #     cam2.sensor_flag = (lines[2] == '1')  # type: bool
                 f.close()
             sleep(0.5)
 
