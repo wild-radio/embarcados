@@ -204,9 +204,14 @@ file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
 file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
 file_monitor2.start()
-while True:
-    if GPIO.event_detected(sensor_pin):
+try:
+    while True:
+        if GPIO.event_detected(sensor_pin):
+            sleep(0.1)
+            sensor_cam1 = True
+            sensor_cam2 = True
         sleep(0.1)
-        sensor_cam1 = True
-        sensor_cam2 = True
-    sleep(0.1)
+except KeyboardInterrupt:
+    cam1.cam.release()
+    # cam2.cam.release()
+    exit()
