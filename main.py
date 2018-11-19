@@ -178,7 +178,7 @@ class Camera(threading.Thread):
             sleep(0.05)
 
     def take_picture(self, img_name):
-        if self.cam.isOpened():
+        if not self.cam.isOpened():
             img = cv2.resize(self.frame, (320, 240))
             cv2.imwrite(img_name, img)
             print("{} written!".format(img_name))
@@ -198,11 +198,11 @@ GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
 sensor_cam2 = False
 cam1 = Camera(0, "main")
-if cam1.cam.isOpened():
+if not cam1.cam.isOpened():
     print "cam1 nao conectada"
     cam1.start()
 cam2 = Camera(1, "secondary")
-if cam2.cam.isOpened():
+if not cam2.cam.isOpened():
     print "cam2 nao conectada"
     cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
