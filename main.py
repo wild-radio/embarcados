@@ -71,23 +71,23 @@ class FileMonitor(threading.Thread):
                 motors_cam1.set_angle1(lines[3])
                 motors_cam1.set_angle2(lines[4])
                 cam1.sensor_flag = (lines[2] == '1')  # type: bool
-            # elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
-            #     cam2.active = (lines[0] == '1')  # type: bool
-            #     cam2.periodic = (lines[1] == '1')  # type: bool
-            #     cam2.sensor_flag = False  # type: bool
-            #     if int(lines[3]) > 40:
-            #         lines[3] = '40'
-            #     elif int(lines[3]) < -40:
-            #         lines[3] = '-40'
-            #     if int(lines[4]) > 40:
-            #         lines[4] = '40'
-            #     elif int(lines[4]) < -40:
-            #         lines[4] = '-40'
-            #     self.alt_ang1 = lines[3]
-            #     self.alt_ang2 = lines[4]
-            #     motors_cam2.set_angle1(lines[3])
-            #     motors_cam2.set_angle2(lines[4])
-            #     cam2.sensor_flag = (lines[2] == '1')  # type: bool
+            elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
+                cam2.active = (lines[0] == '1')  # type: bool
+                cam2.periodic = (lines[1] == '1')  # type: bool
+                cam2.sensor_flag = False  # type: bool
+                if int(lines[3]) > 40:
+                    lines[3] = '40'
+                elif int(lines[3]) < -40:
+                    lines[3] = '-40'
+                if int(lines[4]) > 40:
+                    lines[4] = '40'
+                elif int(lines[4]) < -40:
+                    lines[4] = '-40'
+                self.alt_ang1 = lines[3]
+                self.alt_ang2 = lines[4]
+                motors_cam2.set_angle1(lines[3])
+                motors_cam2.set_angle2(lines[4])
+                cam2.sensor_flag = (lines[2] == '1')  # type: bool
             f.close()
         else:
             self.last_modified = None
@@ -119,28 +119,28 @@ class FileMonitor(threading.Thread):
                         sleep(0.3)
                         cam1.take_picture("/home/pi/.wildradio/pictures/main/confirmation_cam_1.ppm")
                     cam1.sensor_flag = (lines[2] == '1')  # type: bool
-                # elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
-                #     cam2.active = (lines[0] == '1')  # type: bool
-                #     cam2.periodic = (lines[1] == '1')  # type: bool
-                #     cam2.sensor_flag = False  # type: bool
-                #     if int(lines[3]) > 40:
-                #         lines[3] = '40'
-                #     elif int(lines[3]) < -40:
-                #         lines[3] = '-40'
-                #     if int(lines[4]) > 40:
-                #         lines[4] = '40'
-                #     elif int(lines[4]) < -40:
-                #         lines[4] = '-40'
-                #     if self.alt_ang1 != lines[3]:
-                #         self.alt_ang1 = lines[3]
-                #         motors_cam2.set_angle1(lines[3])
-                #     if self.alt_ang2 != lines[4]:
-                #         self.alt_ang2 = lines[4]
-                #         motors_cam2.set_angle2(lines[4])
-                #     if lines[5] == '1':
-                #         sleep(0.3)
-                #         cam2.take_picture("/home/pi/.wildradio/pictures/secondary/confirmation_cam_2.ppm")
-                #     cam2.sensor_flag = (lines[2] == '1')  # type: bool
+                elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
+                    cam2.active = (lines[0] == '1')  # type: bool
+                    cam2.periodic = (lines[1] == '1')  # type: bool
+                    cam2.sensor_flag = False  # type: bool
+                    if int(lines[3]) > 40:
+                        lines[3] = '40'
+                    elif int(lines[3]) < -40:
+                        lines[3] = '-40'
+                    if int(lines[4]) > 40:
+                        lines[4] = '40'
+                    elif int(lines[4]) < -40:
+                        lines[4] = '-40'
+                    if self.alt_ang1 != lines[3]:
+                        self.alt_ang1 = lines[3]
+                        motors_cam2.set_angle1(lines[3])
+                    if self.alt_ang2 != lines[4]:
+                        self.alt_ang2 = lines[4]
+                        motors_cam2.set_angle2(lines[4])
+                    if lines[5] == '1':
+                        sleep(0.3)
+                        cam2.take_picture("/home/pi/.wildradio/pictures/secondary/confirmation_cam_2.ppm")
+                    cam2.sensor_flag = (lines[2] == '1')  # type: bool
                 f.close()
             sleep(0.5)
 
@@ -178,9 +178,10 @@ class Camera(threading.Thread):
             sleep(0.05)
 
     def take_picture(self, img_name):
-        img = cv2.resize(self.frame, (320, 240))
-        cv2.imwrite(img_name, img)
-        print("{} written!".format(img_name))
+        if self.cam.isOpened():
+            img = cv2.resize(self.frame, (320, 240))
+            cv2.imwrite(img_name, img)
+            print("{} written!".format(img_name))
 
     def timed_photo(self):
         if self.periodic:
@@ -195,27 +196,25 @@ sensor_pin = 40
 GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
-# sensor_cam2 = False
+sensor_cam2 = False
 cam1 = Camera(-1, "main")
-cam1.daemon = True
-cam1.start()
-# cam2 = Camera(3, "secondary")
-# cam2.daemon = True
-# cam2.start()
+if cam1.cam.isOpened():
+    cam1.start()
+cam2 = Camera(3, "secondary")
+if cam2.cam.isOpened():
+    cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
-file_monitor1.daemon = True
 file_monitor1.start()
 file_monitor2 = FileMonitor("/home/pi/.wildradio/config/alternativa.txt")
-file_monitor2.daemon = True
 file_monitor2.start()
 try:
     while True:
         if GPIO.event_detected(sensor_pin):
-            sleep(0.1)
+            sleep(0.5)
             sensor_cam1 = True
             sensor_cam2 = True
-        sleep(0.1)
+        sleep(0.05)
 except KeyboardInterrupt:
     cam1.cam.release()
-    # cam2.cam.release()
+    cam2.cam.release()
     exit(1)
