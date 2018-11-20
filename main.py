@@ -179,7 +179,6 @@ class Camera(threading.Thread):
 
     def take_picture(self, img_name):
         if self.cam.isOpened():
-            cv2.imwrite("putaquepariu.ppm", self.frame)
             img = cv2.resize(self.frame, (320, 240))
             cv2.imwrite(img_name, img)
             print("{} written!".format(img_name))
