@@ -163,7 +163,6 @@ class Camera(threading.Thread):
         global sensor_cam2
         while True:
             self.frame = self.cam.read()[1]
-            print "loop da camera {}".format(self.cam_folder)
             if self.active:
                 if (self.cam_folder == "main" and sensor_cam1 and self.sensor_flag) or (
                         self.cam_folder == "secondary" and sensor_cam2 and self.sensor_flag) or (
