@@ -205,7 +205,7 @@ def get_cams_ids():
 
     for line in ls_dev.splitlines():
         if "video" in line:
-            dev_ids.append(line[-1])
+            dev_ids.append(int(line[-1]))
 
     dev_ids.sort()
 
