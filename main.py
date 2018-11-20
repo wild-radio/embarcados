@@ -182,7 +182,7 @@ class Camera(threading.Thread):
         if self.cam.isOpened():
             im = self.cam.read()[1]
             print im
-            if im:
+            if im is not None:
                 img = cv2.resize(im, (320, 240))
                 cv2.imwrite(img_name, img)
                 print("{} written!".format(img_name))
