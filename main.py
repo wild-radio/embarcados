@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from time import sleep
 import time
+import subprocess
 
 
 class Motors:
@@ -52,7 +53,7 @@ class FileMonitor(threading.Thread):
         global motors_cam1
         global motors_cam2
         global cam1
-        # global cam2
+        global cam2
         self.pri_ang1 = None
         self.pri_ang2 = None
         self.alt_ang1 = None
@@ -162,6 +163,7 @@ class Camera(threading.Thread):
         global sensor_cam2
         while True:
             self.frame = self.cam.read()[1]
+            print "loop da camera {}".format(self.cam_folder)
             if self.active:
                 if (self.cam_folder == "main" and sensor_cam1 and self.sensor_flag) or (
                         self.cam_folder == "secondary" and sensor_cam2 and self.sensor_flag) or (
@@ -192,6 +194,38 @@ class Camera(threading.Thread):
         threading.Timer(25, self.timed_photo).start()
 
 
+def get_cams_ids():
+    lsusb = subprocess.check_output(["lsusb"])
+    cam1_dev = None
+    cam2_dev = None
+    cam1_index = None
+    cam2_index = None
+
+    for line in lsusb.splitlines():
+        words = line.split()
+        if words[6] == 'Z-Star':
+            cam1_dev = int(words[3].replace(":", ""))
+        elif words[6] == 'GEMBIRD':
+            cam2_dev = int(words[3].replace(":", ""))
+
+    if cam1_dev and cam2_dev and cam1_dev > cam2_dev:
+        cam1_index = 1
+        cam2_index = 0
+    elif cam1_dev and cam2_dev and cam1_dev < cam2_dev:
+        cam1_index = 0
+        cam2_index = 1
+    elif cam1_dev:
+        cam1_index = 0
+    elif cam2_dev:
+        cam2_index = 0
+
+    print "cam1 index = {}".format(cam1_index)
+    print "cam1 dev = {}".format(cam1_dev)
+    print "cam2 index = {}".format(cam2_index)
+    print "cam2 dev = {}".format(cam2_dev)
+    return [cam1_index, cam2_index]
+
+
 motors_cam1 = Motors(35, 33)
 motors_cam2 = Motors(38, 36)
 sensor_pin = 40
@@ -199,11 +233,12 @@ GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
 sensor_cam1 = False
 sensor_cam2 = False
-cam1 = Camera(0, "main")
+cam1_id, cam2_id = get_cams_ids()
+cam1 = Camera(cam1_id, "main")
 if not cam1.cam.isOpened():
     print "cam1 nao conectada"
     cam1.start()
-cam2 = Camera(1, "secondary")
+cam2 = Camera(cam2_id, "secondary")
 if not cam2.cam.isOpened():
     print "cam2 nao conectada"
     cam2.start()
