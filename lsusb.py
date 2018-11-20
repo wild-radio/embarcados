@@ -19,6 +19,10 @@ if cam1_dev and cam2_dev and cam1_dev > cam2_dev:
 elif cam1_dev and cam2_dev and cam1_dev < cam2_dev:
     cam1_index = 0
     cam2_index = 1
+elif cam1_dev:
+    cam1_index = 0
+elif cam2_dev:
+    cam2_index = 0
 
 print "cam1 index = {}".format(cam1_index)
 print "cam1 dev = {}".format(cam1_dev)
