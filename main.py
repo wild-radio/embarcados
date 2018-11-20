@@ -178,7 +178,7 @@ class Camera(threading.Thread):
             sleep(0.05)
 
     def take_picture(self, img_name):
-        if not self.cam.isOpened():
+        if self.cam.isOpened():
             img = cv2.resize(self.frame, (320, 240))
             cv2.imwrite(img_name, img)
             print("{} written!".format(img_name))
