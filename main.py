@@ -183,9 +183,10 @@ class Camera(threading.Thread):
         if self.cam.isOpened():
             im = self.cam.read()[1]
             print im
-            img = cv2.resize(im, (320, 240))
-            cv2.imwrite(img_name, img)
-            print("{} written!".format(img_name))
+            if im:
+                img = cv2.resize(im, (320, 240))
+                cv2.imwrite(img_name, img)
+                print("{} written!".format(img_name))
 
     def timed_photo(self):
         if self.periodic:
