@@ -24,10 +24,11 @@ class Motors:
 
     # changes servo 1 angle
     def set_angle1(self, angle):
-        if int(angle) < -60 or int(angle) > 60:
+        angle = int(angle) * -1
+        if angle < -60 or angle > 60:
             return
 
-        duty = (90 + int(angle)) / 18.0 + 2
+        duty = (90 + angle) / 18.0 + 2
         GPIO.output(self.pin1, True)
         self.pwm1.ChangeDutyCycle(duty)
         sleep(1)
@@ -36,10 +37,11 @@ class Motors:
 
     # changes servo 2 angle
     def set_angle2(self, angle):
-        if int(angle) < -60 or int(angle) > 60:
+        angle = int(angle) * -1
+        if angle < -60 or angle > 60:
             return
 
-        duty = (90 + int(angle)) / 18.0 + 2
+        duty = (90 + angle) / 18.0 + 2
         GPIO.output(self.pin2, True)
         self.pwm2.ChangeDutyCycle(duty)
         sleep(1)
@@ -162,7 +164,6 @@ class Camera(threading.Thread):
         global sensor_cam1
         global sensor_cam2
         while True:
-            self.frame = self.cam.read()[1]
             if self.active:
                 if (self.cam_folder == "main" and sensor_cam1 and self.sensor_flag) or (
                         self.cam_folder == "secondary" and sensor_cam2 and self.sensor_flag) or (
@@ -180,6 +181,8 @@ class Camera(threading.Thread):
 
     def take_picture(self, img_name):
         if self.cam.isOpened():
+            for i in range(10):
+                self.frame = self.cam.grab()
             im = self.cam.read()[1]
             print im
             if im is not None:
@@ -235,7 +238,7 @@ def get_cams_ids():
 
 
 motors_cam1 = Motors(35, 33)
-motors_cam2 = Motors(38, 36)
+motors_cam2 = Motors(36, 38)
 sensor_pin = 40
 GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
@@ -245,10 +248,12 @@ cam1_id, cam2_id = get_cams_ids()
 cam1 = Camera(cam1_id, "main")
 if not cam1.cam.isOpened():
     print "cam1 nao conectada"
+else:
     cam1.start()
 cam2 = Camera(cam2_id, "secondary")
 if not cam2.cam.isOpened():
     print "cam2 nao conectada"
+else:
     cam2.start()
 file_monitor1 = FileMonitor("/home/pi/.wildradio/config/principal.txt")
 file_monitor1.start()
