@@ -262,7 +262,7 @@ file_monitor2.start()
 try:
     while True:
         if GPIO.event_detected(sensor_pin):
-            sleep(0.5)
+            sleep(0.3)
             sensor_cam1 = True
             sensor_cam2 = True
         sleep(0.05)
