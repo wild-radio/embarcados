@@ -4,7 +4,7 @@ from time import sleep
 # initialize
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BOARD)
-GPIO.setup(40, GPIO.IN)
+GPIO.setup(7, GPIO.IN)
 try:
 	while True:
 		print GPIO.input(40)
