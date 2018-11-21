@@ -238,7 +238,7 @@ def get_cams_ids():
 
 
 motors_cam1 = Motors(35, 33)
-motors_cam2 = Motors(36, 38)
+motors_cam2 = Motors(38, 36)
 sensor_pin = 7
 GPIO.setup(sensor_pin, GPIO.IN)
 GPIO.add_event_detect(sensor_pin, GPIO.RISING)
