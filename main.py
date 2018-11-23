@@ -72,6 +72,7 @@ class FileMonitor(threading.Thread):
                 self.pri_ang1 = lines[3]
                 self.pri_ang2 = lines[4]
                 motors_cam1.set_angle1(lines[3])
+                sleep(1)
                 motors_cam1.set_angle2(lines[4])
                 cam1.sensor_flag = (lines[2] == '1')  # type: bool
             elif self.file_name == "/home/pi/.wildradio/config/alternativa.txt":
