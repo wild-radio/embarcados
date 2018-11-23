@@ -89,6 +89,7 @@ class FileMonitor(threading.Thread):
                 self.alt_ang1 = lines[3]
                 self.alt_ang2 = lines[4]
                 motors_cam2.set_angle1(lines[3])
+                sleep(1)
                 motors_cam2.set_angle2(lines[4])
                 cam2.sensor_flag = (lines[2] == '1')  # type: bool
             f.close()
@@ -115,6 +116,7 @@ class FileMonitor(threading.Thread):
                     if self.pri_ang1 != lines[3]:
                         self.pri_ang1 = lines[3]
                         motors_cam1.set_angle1(lines[3])
+                        sleep(1)
                     if self.pri_ang2 != lines[4]:
                         self.pri_ang2 = lines[4]
                         motors_cam1.set_angle2(lines[4])
@@ -137,6 +139,7 @@ class FileMonitor(threading.Thread):
                     if self.alt_ang1 != lines[3]:
                         self.alt_ang1 = lines[3]
                         motors_cam2.set_angle1(lines[3])
+                        sleep(1)
                     if self.alt_ang2 != lines[4]:
                         self.alt_ang2 = lines[4]
                         motors_cam2.set_angle2(lines[4])
