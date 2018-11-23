@@ -194,7 +194,7 @@ class Camera(threading.Thread):
         if self.periodic:
             self.timer_flag = True
         print "{} timer".format(self.cam_folder)
-        threading.Timer(30, self.timed_photo).start()
+        threading.Timer(600, self.timed_photo).start()
 
 
 def get_cams_ids():
